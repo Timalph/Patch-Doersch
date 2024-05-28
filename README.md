@@ -9,7 +9,7 @@ The code uses a single C++ that is wrapped for use in python with pybind11. The 
 
 1. mkdir compiling, cd compiling
 1. Clone the pybind11 directory from here into compiling
-2. cp ../CMakeLists.txt ./ #copy files into the compiling directory
+2. cp ../CMakeLists.txt ./ 
 3. cp ../features.cpp ./
 4. mkdir build
 5. cd build
