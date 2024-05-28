@@ -18,15 +18,11 @@ import assignNN
 import assignNN_old
 import argparse
 import math
-import sys
+
 import mat_funcs
 import cv2 as cv
 import Visualizing
 import train
-## ========================================================================
-## Set parameters that are needed "globally"
-## ========================================================================l
-#bigparis
 def log(ds, log):
     
     with open(os.path.join(ds['raw_outdir'], 'log.txt'), 'a') as f:
@@ -69,13 +65,22 @@ def main(args, tiny=False):
 
 
 
+    if not args.positives:
+        set_of_pos_nbs = ['0', '1', '2', '3']
+    else:
+        set_of_pos_nbs = args.positives
+    if not args.negatives:
+        set_of_neg_nbs = ['8', '9', '10', '11']
+    else:
+        set_of_neg_nbs = args.negatives
 
-    set_of_pos_nbs = ['0', '1', '2', '3']
-    set_of_neg_nbs = ['8', '9', '10', '11']
 
 
-    topdir = 'Dataset10k'
-    os.makedirs(out_dir, exist_ok=True)    
+    if not args.topdir:
+        topdir = 'Dataset10k'
+    else:
+        topdir = args.topdir
+    os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, 'log.txt'), 'w') as f:
         f.write('log start: ' + '/n')
     
@@ -85,8 +90,7 @@ def main(args, tiny=False):
     
     root_dir = os.path.join(basepath, topdir, 'cutouts/')
     path_out = os.path.abspath(os.getcwd()) + '/' + out_dir
-    print(root_dir)
-    sys.exit(0)
+    
     
     if args.sampling:
         
@@ -113,14 +117,11 @@ def main(args, tiny=False):
             
         ds = Create_Dataset.script_setup(out_dir, path_out, dataframe, root_dir)
             
-        ## This seems like an elaborate way to just specify imgs is the dataframe
-        #imgs = ds['imgs'][ds['conf']['currimset']]
 
         imgs = dataframe
         
         
-        
-        # Does parimgs mean: Paris images?
+    
         parimgs = dataframe.loc[dataframe['city'] == ds['mycity']]
         otherimgs = dataframe.loc[dataframe['city'] != ds['mycity']]
         
@@ -149,7 +150,7 @@ def main(args, tiny=False):
         ### step = 
         step = int(possplit * len(set_of_pos_nbs) /1000)
         
-        ### He randomly samples the indices of half of the positive images
+        ### Doersch randomly samples the indices of half of the positive images
         
         ds['isinit'] = Utils.makemarks(ds['myiminds'][list(range(0, len(ds['myiminds']), step))], len(imgs))
         
@@ -196,18 +197,12 @@ def main(args, tiny=False):
         ds['sample']['features'].clear()
         
         ## Sample negative indices
-        #workspace = loadmat(matPATH + 'negnums_for_python')
         initInds = np.where(np.logical_and(1-ds['ispos'], ds['isinit']))[0]
         myinds = np.random.permutation(initInds)[:30]
-        #order = workspace['ord'].squeeze()-1
-        #myinds = order[:min(len(order),30)]
+
         
-        #if not matlabinds:
-        #    raise ValueError("Mapreduce is continuing its count of dsidx I presume. I don't know what the implications of that are for this implementation.")
         print('Sampling negative patches')
         ds['sample']['initInds'] = myinds
-        ## no_of_pos_images makes sure this script continues with dsidx where the 
-        ## matlabscript starts again after sampling positive patches
         
         for ind in ds['sample']['initInds']:
             print(ind)
@@ -232,16 +227,11 @@ def main(args, tiny=False):
         
         
         ### Centers only computed for positive set
-        ### The mean operator in matlab outputs something ever so slightly different
         ds['centers'] = Utils.getcenters(ds['initFeats'])
         ds['selectedClust'] = np.arange(ds['initFeats'].shape[0])
         ds['assignedClust'] = ds['selectedClust']
         
         ## compute nearest neighbors for each candidate patch
-        #ds['centers'] = []
-        #directory = '/Users/timalph/Documents/Paris/release/pyth/out_10krun_May/ds/'
-        
-        #multi(ds['myiminds'], 'assignNN', ds, directory)
         
         with open(os.path.join(path_out, 'pos_patches2.pickle'), 'wb') as handle:
             pickle.dump(ds, handle)
@@ -342,11 +332,8 @@ def main(args, tiny=False):
     
     topndetstrain = pd.concat(topndetstrain).reset_index(drop=True)
     
-    #with open ('extractpatches_ds_26april.pickle', 'wb') as f:
-    #    pickle.dump(ds, f)
     
     #Extract the features for the top 5 for each cluster
-    #Qualitatively checked
     print("extractpatches...")
     log(ds, "extract patches...")
     trpatches = Utils.extractpatches(ds, topndetstrain, ds['imgs'][ds['conf']['currimset']])
@@ -417,8 +404,6 @@ def main(args, tiny=False):
     ds['finSelectedClust'] = {}
     
     num_train_its=3
-    ### we want the y dim of len batch round posfeatures, may need to be an array instead of a list
-    
     conf2 = {}
     
     log(ds, "start svm...")
@@ -434,18 +419,7 @@ def main(args, tiny=False):
         
         ds['batch']['round']['curriter'] = j
         
-        
-        # code below used to pause the script during training, i'm not sure
-        # stopfile=[ds.prevnm '_stop'];
-        # if(exist(stopfile,'file'))
-        #   %lets you stop training and just output the results so far
-        #   break;
-        # end
-        # pausefile=[ds.prevnm '_pause'];
-        # if(exist(pausefile,'file'))
-        #   keyboard;
-        # end
-        
+
         # Choose which candidate clusters to start working on
     
         ntoadd = ds['conf']['processingBatchSize'] - len(ds['batch']['round']['selectedClust'])
@@ -606,10 +580,6 @@ def main(args, tiny=False):
         dispdetscell = pd.DataFrame([])
         dispdetscellv2 = np.array([])
         
-                
-        ## It says here that code has been chaged from for to end and dsipdets=cell2mat etc
-        ## I assume this is my past self telling me that something has been changed for it to work
-        ## Adjust this when you run the full script accordingly. 
         
         for i, clust in enumerate(ds['batch']['round']['selectedClust']):
     
@@ -624,12 +594,6 @@ def main(args, tiny=False):
         ## to disk write failers you can just restart it at line 286 and the right 
         ## thing should happen. After this point, however, the program starts performing updates that shouldn't happen twice')
         
-        ## prepbatchwisebestbin is used here, unsure if I need this. 
-        
-        
-        ## assuming this is all just for displaying
-        #dispres_discpatch (create html display from ds.bestbin)
-        #ds['bestbin_topn']['alldiscpatchimg'] = np.zeros(len(ds['bestbin_topn']['alldiscpatchimg']))
         
         tooOldClusts = np.array(ds['batch']['round']['selectedClust'])[np.array(ds['batch']['round']['selClustIts']) >= num_train_its-1]
         try:
@@ -777,15 +741,12 @@ def main(args, tiny=False):
             post = (counts[:,0]+1)/(np.sum(counts, axis=1)+2)
             detord = mat_funcs.matsort(post, descending=True)
         
-        ## Groups and affinities are all exactly the same as MATLAB
-        ## This means they might need -1 indexing
         overl, groups, affinities = Visualizing.findOverlapping([topNall[i] for i in detord], {'findNonOverlap' : 1})
         
         resSelectedClust = np.array([ds['selectedClust'][x] for x in detord[overl]])
         
         detsimple = topn[0]
         
-        ### ????? this suddenly didnt work and I cant check why without rerunning the entire matlab script
         try:
             for j in range(len(detsimple)):
                 detsimple['detector'].iloc[j] = ds['selectedClust'][detsimple['detector'].iloc[j]]
@@ -830,15 +791,15 @@ def main(args, tiny=False):
             os.makedirs(ds['raw_outdir'] + '/alldiscpatchimg[]')
         except FileExistsError:
             pass
-        if not 'savedir' in ds:
-            for key, value in ds['bestbin']['alldiscpatchimg'].items():
-                    cv.imwrite( ds['raw_outdir'] + '/alldiscpatchimg[]/{}.jpg'.format(key), 
-                               cv.cvtColor(value, cv.COLOR_BGR2RGB))
-                
+        #rm#if not 'savedir' in ds:
+        for key, value in ds['bestbin']['alldiscpatchimg'].items():
+                cv.imwrite( ds['raw_outdir'] + '/alldiscpatchimg[]/{}.jpg'.format(key), 
+                           cv.cvtColor(value, cv.COLOR_BGR2RGB))
             
+        
             
-        else:
-            raise NotImplementedError
+        #rm#else:
+            #rm#raise NotImplementedError
         
         ds['bestbin']['decision'] = nycdets2.decision.to_numpy()
         countsIdxOrd = detord[overl[:min(len(overl), 500)]]
@@ -846,7 +807,6 @@ def main(args, tiny=False):
         ds['bestbin']['isgeneral'] = np.ones(len(ds['bestbin']['tosave']))
         ds['bestbin']['counts'] = counts[countsIdxOrd]
         
-        ## if exists misclabel, didnt exist in tinyparis run
  
         ds = Visualizing.dispres_discpatch(ds)
         with open(ds['raw_outdir'] + '/{}_output.html'.format(disptype), 'w') as f:
@@ -858,11 +818,12 @@ def main(args, tiny=False):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--outdir', type=str, default = 'bigparis_test_10k_no_mp2')
+    parser.add_argument('--outdir', type=str, default = 'output')
     parser.add_argument('--sampling', type=int, default = 1)
     parser.add_argument('--clustering', type=int, default = 1)
     parser.add_argument('--basepath', type=str, default='')
-    parser.add_argument('--posneg', type=str, default='')
+    parser.add_argument('--positives', nargs='+')
+    parser.add_argument('--negatives', nargs='+')
     args = parser.parse_args()
     
     main(args)

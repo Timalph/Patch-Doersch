@@ -374,8 +374,7 @@ def getMetadataForPositives(selected, level, indexes, prSize,
         x1 = indexes[selInd, 1]
         y1 = indexes[selInd, 0]
         
-        ## Are these offsets correct? do we need do subtract 1 from them 
-        ## for Matlab porting?
+
         xoffset = math.floor((x1) * pyramid['sbins'] * levSc / canoSc)
         yoffset = math.floor((y1) * pyramid['sbins'] * levSc / canoSc)
         thisPatch = levelPatch + np.array((xoffset, xoffset, yoffset, yoffset))
@@ -410,19 +409,7 @@ def getMetadataForPositives(selected, level, indexes, prSize,
         
         metadata[idx]['pyramid'] = np.append(np.array(level[selInd]), indexes[selInd])
 
-        metadata[idx] = clipPatchToBoundary(metadata[idx], suppress_warning)
-        
-        #### Unsure if it's necessary to clip the patch
-            #metadata[idx] = clipPatchToBoundary(metadata[idx])
-        
-            
-        #else:
-        #    print(im)
-        #    print(type(im))
-        #    raise ValueError("Im is supposed to be an integer for the metadata to fill.")
-            
-                
-                
+        metadata[idx] = clipPatchToBoundary(metadata[idx], suppress_warning)#            
                 
     
     return metadata
@@ -560,14 +547,13 @@ def prepbatchwisebestbin(ds, detsimple, batchidx, npatchesper=5, ranks=False):
             print(inds2)
             print(saveranks)
             saveranks[inds[inds2]] = ranks[:len(inds2)]
-            #raise ValueError('Read the matlab function to see what ranks is supposed to do.')
-            
+
     detsimple = detsimple[tokeep==1]
     
     if ranks:
         saveranks = saveranks[tokeep==1]
         saveranks = saveranks.flatten()
-        #raise ValueError('Read the matlab function to see what ranks is supposed to do.')
+
     
     ds['bestbin']['alldisclabelcat'] = detsimple[['imidx', 'detector']].to_numpy()
     r = extractpatches(ds, detsimple, ds['conf']['currimset'], conf='noresize')
@@ -648,10 +634,7 @@ def numel(x):
         return len(x)
         
 
-## Trying to implement a functional copy of dssave used in the matlab implementation
 
-## Takes path to file, filename, and data
-## Path is taken like so: ds.batch.round for ~/ds/batch/round
 def dssave(path, fname,  data):
     
     filename = fname + '.pickle'
@@ -661,12 +644,10 @@ def dssave(path, fname,  data):
     current_path = os.getcwd()
     
     full = os.path.join(current_path + p)
-    #print(full)
     try:
         os.makedirs(full)
     except FileExistsError:
         pass
-        #print('The directory:', full, 'already exists!')
     
     with open(os.path.join(full,filename), 'wb') as h:
         pickle.dump(data, h)

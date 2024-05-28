@@ -1,4 +1,4 @@
-#/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Mon May  9 16:20:11 2022
@@ -71,7 +71,6 @@ def build_dataframe(poslist, neglist, dirname,
                 amount = (no_of_neg_imgs*len(neglist)) - len(df.loc[df['city']=='negativecity'])
             else:
                 amount = no_of_neg_imgs
-            print(amount)
             index = np.random.permutation(np.arange(len(list_of_images)))
             negindex = index[:amount]
             list_of_images = list(np.array(list_of_images)[negindex])
@@ -88,7 +87,7 @@ def build_dataframe(poslist, neglist, dirname,
             
             df = df.append(tmp_df)
     
-    print(time.time() - start)
+    print('Images sampled in {}'.format(time.time() - start))
     
     return df.reset_index(drop=True)
 
@@ -111,8 +110,6 @@ def script_setup(out_dir, path_out, dataframe, root_dir):
     
     np.random.seed(20)
     
-    ## SVM Flags are here to make sure we know what the flags are when we run in to 
-    ## Code that uses them. 
     ds['conf']['params'] = {'imageCanonicalSize': 400, 'patchCanonicalSize': np.array([80,80]),
                             'scaleIntervals': 8, 'sBins': 8, 'useColor': 1,
                             'patchOverlapThreshold': 0.6}
@@ -122,8 +119,6 @@ def script_setup(out_dir, path_out, dataframe, root_dir):
     ds['conf']['detectionParams'] = {'selectTopN': False, 'useDecisionThresh': True,
                                    'overlap': 0.4, 'fixedDecisionThresh': -1.002}
     
-    ## This seems like an elaborate way to just specify imgs is the dataframe
-    #imgs = ds['imgs'][ds['conf']['currimset']]
     imgs = dataframe
     ds['mycity'] = 'positivecity'
         

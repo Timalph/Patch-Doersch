@@ -303,8 +303,7 @@ def simplifydets(detections, imidx, assignedClust=False, configuration=False, fe
                        'y1':md[i][j]['y1'],
                        'x2':md[i][j]['x2'],
                        'y2':md[i][j]['y2']}
-                ## Line that asks if imidx is even a var. When are we going to need that?
-                
+
                 if Utils.numel(imidx) == 1:
                     curimidx=imidx
                 else:

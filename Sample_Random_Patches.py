@@ -125,11 +125,6 @@ def main(pos, ds, samplelimit=-1, sd = 20, matlabinds=False, corr='quick'):
             
             IGS = IG
             
-            #### ALERT DELETE #####
-            #workspace = loadmat(matPATH + 'getRandForPdf.mat')
-            #IGS = workspace['IGS']
-            
-            ## Old code before I figure out the exact distribution copy
             
             if corr == 'quick':
                 pDist = getQuickDistribution(IGS, levPatSize, style='notmat')
@@ -146,8 +141,6 @@ def main(pos, ds, samplelimit=-1, sd = 20, matlabinds=False, corr='quick'):
             pDist1d = pDist.flatten(order='F')
             
             
-            ### Check if this function is correct, you deleted the +1
-            ### Check what the lowest number is that this can give
             randNums = getRandForPdf(pDist1d, numLevPat)
             
             if matlabinds==True:
@@ -161,12 +154,6 @@ def main(pos, ds, samplelimit=-1, sd = 20, matlabinds=False, corr='quick'):
                 workspace = loadmat(matPATH + 'negnums_for_python')
                 randNums = workspace['negnums_metadata' + '_' + str(pos+1) + '_' + str(idx+1)][0][0].squeeze()-1
             
-            #pos = 18
-            #pDist1d = workspace['pDist1d']
-            #randNums = workspace['randNums']
-            
-            ### this -1 is here for matlab indexing, unsure if this is right 
-            ### because I don't know what the lowest number is that randNums can get
             probs = pDist1d[randNums]
             
             IY, IX = mat_funcs.ind2sub(IGS.shape, randNums)
@@ -397,19 +384,6 @@ def matlab_style_gauss2D(shape=(3,3),sigma=0.5):
     return h
 
 
-
-    
-     
-
-    
-### This Image_object class can hold all the subfunctions we are using such as
-### Patch canonical size and what not. 
-
-#   pSize = levPatSize
-#   h = fspecial('gaussian', pSize, min(pSize)/3);
-#   I = imfilter(IGS, h);
-#   dist = I ./ sum(sum(I));
-#   pDist = dist
     
     
     
@@ -449,4 +423,3 @@ def sumpatches(x):
     y2 = sum(np.array([entry['y2'] for entry in x.values()])+1)
     
     print(x1 + x2 + y1 + y2)
-#fp, fm = tfd.test(mat_img, params, matPATH)
