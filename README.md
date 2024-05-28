@@ -5,15 +5,14 @@ This repository contains code and instructions to run the Python implementation 
 
 
 ## Compiling
-The code uses a single C++ that is wrapped for use in python with pybind11. The compiled module (hog.cpython-37m-x86_64-linux-gnu.so) works for Linux 64-bit x86 running a GNU C Library on Python 3.7. If you need to recompile the file follow these steps:
+The code uses a single C++ that is wrapped for use in python with pybind11. If necessary you can clone pybind [here](https://github.com/pybind/pybind11). The compiled module (hog.cpython-37m-x86_64-linux-gnu.so) works for Linux 64-bit x86 running a GNU C Library on Python 3.7. If you need to recompile the file follow these steps:
 
-1. mkdir compiling, cd compiling
-1. Clone the pybind11 directory from here into compiling
+1. mkdir compiling; cd compiling
 2. cp ../CMakeLists.txt ./ 
 3. cp ../features.cpp ./
 4. mkdir build
 5. cd build
-6. Make sure you have cmake version >= 3.4 
+6. #Make sure you have cmake version >= 3.4 
 7. cmake
 8. make ..
 9. You should now have a hog.so file in compiling/build/, move this file to root (mv hog.so ../../) and you're done!
