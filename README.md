@@ -2,7 +2,7 @@
 This repository contains code and instructions to run the Python implementation of the discriminative clustering approach used in the paper Perceptive Visual Urban Analytics is Not (Yet) Suitable for Municipalities. The code is a reimplementation of the MATLAB code from What Makes Paris Look Like Paris by Doersch et al. 
 
 ## Dataset
-
+![alt text](./patches_high.png)
 
 ## Compiling
 The code uses a single C++ that is wrapped for use in python with pybind11. If necessary you can clone pybind [here](https://github.com/pybind/pybind11). The compiled module (hog.cpython-37m-x86_64-linux-gnu.so) works for Linux 64-bit x86 running a GNU C Library on Python 3.7. If you need to recompile the file follow these steps:
