@@ -22,6 +22,7 @@ Structure your dataset as follows:
 The path to your images should be basepath + topdir + cutouts. Inside their can be any number of folders (labelled by socio-economic bin for example) containing images such that the path is:
 
    ```\$basepath\$/\$topdir\$/cutouts/0/\*.jpg```
+   
    ```\$basepath\$/\$topdir\$/cutouts/1/\*.jpg```
    
 where 0 or 1 can refer to the bin the images belong to.
